@@ -1,11 +1,11 @@
-{{- range .Results }}
+{{- range . }}
 Target: {{ .Target }}
 Type: {{ .Type }}
 
 {{- if .Vulnerabilities }}
 Vulnerabilities:
 {{- range .Vulnerabilities }}
-- {{ .VulnerabilityID }} | {{ .PkgName }} | {{ .Severity }} | {{ .Title }}
+- {{ .VulnerabilityID }} | {{ .PkgName }} | {{ .Severity }}
 {{- end }}
 {{- else }}
 No vulnerabilities found
