@@ -48,7 +48,7 @@ jobs:
             --scanners vuln \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
-            --vuln-type os,library \
+            --pkg-types os,library \
             --exit-code 0 \
             --format template \
             --template "@templates/trivy-summary.tpl" \

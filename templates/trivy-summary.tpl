@@ -1,38 +1,15 @@
-========================================
-TRIVY SECURITY SCAN SUMMARY
-========================================
-
-Scan Target: {{ .ArtifactName }}
-Scan Type  : {{ .ArtifactType }}
-
-{{- if .Results }}
 {{- range .Results }}
-
-----------------------------------------
 Target: {{ .Target }}
-----------------------------------------
+Type: {{ .Type }}
 
 {{- if .Vulnerabilities }}
-VULNERABILITIES FOUND:
+Vulnerabilities:
 {{- range .Vulnerabilities }}
-
-- ID        : {{ .VulnerabilityID }}
-  Severity  : {{ .Severity }}
-  Package   : {{ .PkgName }}
-  Installed : {{ .InstalledVersion }}
-  Fixed     : {{ if .FixedVersion }}{{ .FixedVersion }}{{ else }}Not Available{{ end }}
-  Title     : {{ .Title }}
-
+- {{ .VulnerabilityID }} | {{ .PkgName }} | {{ .Severity }} | {{ .Title }}
 {{- end }}
 {{- else }}
-No HIGH or CRITICAL vulnerabilities found.
+No vulnerabilities found
 {{- end }}
 
+----------------------------------------
 {{- end }}
-{{- else }}
-No scan results available.
-{{- end }}
-
-========================================
-END OF REPORT
-========================================
