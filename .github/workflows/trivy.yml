@@ -83,8 +83,9 @@ jobs:
           trivy fs . \
             --scanners secret \
             --exit-code 0 \
-            --format json \
-            --output trivy-secret-report.json
+            --format template \
+            --template "@templates/trivy-secret-summary.tpl" \
+            --output trivy-secret-summary.txt
 
       # ===============================
       # LICENSE SCAN
@@ -99,8 +100,9 @@ jobs:
           trivy fs . \
             --scanners license \
             --exit-code 0 \
-            --format json \
-            --output trivy-license-report.json
+            --format template \
+            --template "@templates/trivy-license-summary.tpl" \
+            --output trivy-license-summary.txt
 
       # ===============================
       # IMAGE BUILD + IMAGE SCAN
