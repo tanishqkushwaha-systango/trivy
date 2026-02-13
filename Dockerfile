@@ -1,13 +1,24 @@
-FROM golang:1.24 AS build
-WORKDIR /go/src/github.com/zricethezav/gitleaks
-COPY . .
-RUN VERSION=$(git describe --tags --abbrev=0) && \
-CGO_ENABLED=0 go build -o bin/gitleaks -ldflags "-X=github.com/zricethezav/gitleaks/v8/version.Version=${VERSION}"
+# Intentionally old image (for Trivy demo only)
+FROM alpine:3.10
 
-FROM alpine:3.22
-RUN apk add --no-cache bash git openssh-client
-COPY --from=build /go/src/github.com/zricethezav/gitleaks/bin/* /usr/bin/
+# Metadata
+LABEL maintainer="trivy-demo"
+LABEL purpose="trivy-image-scan-demo"
 
-RUN git config --global --add safe.directory '*'
+# Install outdated & vulnerable packages
+RUN apk update && \
+    apk add --no-cache \
+      bash \
+      curl \
+      openssl \
+      busybox \
+      git && \
+    rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["gitleaks"]
+# Run as root (intentional)
+USER root
+
+# Dummy app file
+RUN echo "Trivy image scan demo" > /app.txt
+
+CMD ["sh"]
