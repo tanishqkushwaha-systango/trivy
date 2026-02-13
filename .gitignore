@@ -1,0 +1,56 @@
+# ===============================
+# Trivy Outputs
+# ===============================
+trivy-*-report.json
+trivy-*-summary.txt
+trivy-*.html
+trivy-*.sarif
+.trivy/
+
+# ===============================
+# GitHub Actions
+# ===============================
+.github/artifacts/
+.github/cache/
+
+# ===============================
+# Docker
+# ===============================
+*.tar
+*.log
+.docker/
+docker-compose.override.yml
+
+# ===============================
+# Node.js / Python (dummy apps)
+# ===============================
+node_modules/
+venv/
+__pycache__/
+*.pyc
+.env
+
+# ===============================
+# Terraform / IaC (if used)
+# ===============================
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+
+# ===============================
+# OS / Editor Noise
+# ===============================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.tmp
+
+# ===============================
+# Security / Secrets
+# ===============================
+*.key
+*.pem
+*.crt

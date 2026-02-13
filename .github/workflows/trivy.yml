@@ -1,0 +1,137 @@
+name: Trivy Security Scans
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ----------------------------
+      # Checkout Repository
+      # ----------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ----------------------------
+      # Install Trivy
+      # ----------------------------
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" \
+            | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+          trivy --version
+
+      # ===============================
+      # FILESYSTEM VULNERABILITY SCAN
+      # ===============================
+      - name: Trivy Filesystem Vulnerability Scan
+        run: |
+          trivy fs . \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --vuln-type os,library \
+            --exit-code 0 \
+            --format table
+
+          trivy fs . \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --vuln-type os,library \
+            --exit-code 0 \
+            --format template \
+            --template "@templates/trivy-summary.tpl" \
+            --output trivy-fs-vuln-summary.txt
+
+      # ===============================
+      # IAC CONFIG SCAN
+      # ===============================
+      - name: Trivy Config Scan (IaC)
+        run: |
+          trivy config . \
+            --severity HIGH,CRITICAL \
+            --exit-code 0 \
+            --format table
+
+          trivy config . \
+            --severity HIGH,CRITICAL \
+            --exit-code 0 \
+            --format json \
+            --output trivy-config-report.json
+
+      # ===============================
+      # SECRET SCAN
+      # ===============================
+      - name: Trivy Secret Scan
+        run: |
+          trivy fs . \
+            --scanners secret \
+            --exit-code 0 \
+            --format table
+
+          trivy fs . \
+            --scanners secret \
+            --exit-code 0 \
+            --format json \
+            --output trivy-secret-report.json
+
+      # ===============================
+      # LICENSE SCAN
+      # ===============================
+      - name: Trivy License Scan
+        run: |
+          trivy fs . \
+            --scanners license \
+            --exit-code 0 \
+            --format table
+
+          trivy fs . \
+            --scanners license \
+            --exit-code 0 \
+            --format json \
+            --output trivy-license-report.json
+
+      # ===============================
+      # IMAGE BUILD + IMAGE SCAN
+      # ===============================
+      - name: Build Docker Image (if Dockerfile exists)
+        if: hashFiles('Dockerfile') != ''
+        run: |
+          docker build -t trivy-test-image:scan .
+
+      - name: Trivy Docker Image Vulnerability Scan
+        if: hashFiles('Dockerfile') != ''
+        run: |
+          trivy image trivy-test-image:scan \
+            --severity HIGH,CRITICAL \
+            --exit-code 0 \
+            --format table
+
+          trivy image trivy-test-image:scan \
+            --severity HIGH,CRITICAL \
+            --exit-code 0 \
+            --format template \
+            --template "@templates/trivy-summary.tpl" \
+            --output trivy-image-vuln-summary.txt
+
+      # ----------------------------
+      # Upload Reports
+      # ----------------------------
+      - name: Upload Trivy Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports
+          path: |
+            trivy-*-summary.txt
+            trivy-*-report.json
