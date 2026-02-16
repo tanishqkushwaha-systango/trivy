@@ -125,11 +125,14 @@ jobs:
             --format table
 
           trivy image trivy-test-image:scan \
+            --scanners vuln \
+            --pkg-types os \
             --severity HIGH,CRITICAL \
             --exit-code 0 \
             --format template \
             --template "@templates/trivy-img.tpl" \
-            --output trivy-image-vuln-summary.txt
+            --output trivy-image-os-summary.txt
+
 
       # ----------------------------
       # Upload Reports
