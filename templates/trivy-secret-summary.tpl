@@ -3,8 +3,10 @@ Trivy Secret Scan Report
 ==============================
 
 {{- range . }}
+{{- $file := .Target }}
+
 --------------------------------------------------
-Scanned File : {{ .Target }}
+Scanned File : {{ $file }}
 Scan Type   : Secret Detection
 --------------------------------------------------
 
@@ -18,7 +20,7 @@ Rule ID    : {{ .RuleID }}
 Category   : {{ .Category }}
 Severity   : {{ .Severity }}
 
-Location   : {{ $.Target }}
+Location   : {{ $file }}
 Line Range : {{ .StartLine }} - {{ .EndLine }}
 
 Detected Value:
