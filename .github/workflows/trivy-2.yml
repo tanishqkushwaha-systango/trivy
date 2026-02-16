@@ -1,0 +1,108 @@
+name: Trivy Security Scans
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      # ----------------------------
+      # Checkout Repository
+      # ----------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ----------------------------
+      # Install Trivy
+      # ----------------------------
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" \
+            | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+          trivy --version
+
+      # ===============================
+      # FILESYSTEM VULNERABILITY SCAN
+      # ===============================
+      - name: Trivy Filesystem Scan (SARIF)
+        run: |
+          trivy fs . \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --format sarif \
+            --output trivy-fs.sarif \
+            --exit-code 0
+
+      # ===============================
+      # IAC CONFIG SCAN
+      # ===============================
+      - name: Trivy IaC Scan (SARIF)
+        run: |
+          trivy config . \
+            --severity HIGH,CRITICAL \
+            --format sarif \
+            --output trivy-config.sarif \
+            --exit-code 0
+
+      # ===============================
+      # SECRET SCAN
+      # ===============================
+      - name: Trivy Secret Scan (SARIF)
+        run: |
+          trivy fs . \
+            --scanners secret \
+            --format sarif \
+            --output trivy-secret.sarif \
+            --exit-code 0
+
+      # ===============================
+      # LICENSE SCAN
+      # ===============================
+      - name: Trivy License Scan (SARIF)
+        run: |
+          trivy fs . \
+            --scanners license \
+            --format sarif \
+            --output trivy-license.sarif \
+            --exit-code 0
+
+      # ===============================
+      # IMAGE BUILD + IMAGE SCAN
+      # ===============================
+      - name: Build Docker Image (if Dockerfile exists)
+        if: hashFiles('Dockerfile') != ''
+        run: |
+          docker build -t trivy-test-image:scan .
+
+      - name: Trivy Image Scan (SARIF)
+        if: hashFiles('Dockerfile') != ''
+        run: |
+          trivy image trivy-test-image:scan \
+            --severity HIGH,CRITICAL \
+            --format sarif \
+            --output trivy-image.sarif \
+            --exit-code 0
+
+      # ----------------------------
+      # Upload SARIF to GitHub Security
+      # ----------------------------
+      - name: Upload Trivy SARIF Reports
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: .
+
