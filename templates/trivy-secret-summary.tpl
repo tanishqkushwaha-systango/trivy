@@ -3,7 +3,7 @@ Trivy Secret Scan Summary
 ==============================
 
 {{- range . }}
-Target: {{ .Target }}
+Target File: {{ .Target }}
 
 {{- if .Secrets }}
 Secrets Detected:
@@ -14,7 +14,7 @@ Category  : {{ .Category }}
 Severity  : {{ .Severity }}
 Title     : {{ .Title }}
 
-File      : {{ .FilePath }}
+File      : {{ $.Target }}
 StartLine : {{ .StartLine }}
 EndLine   : {{ .EndLine }}
 
