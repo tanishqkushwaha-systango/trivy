@@ -11,10 +11,6 @@ Misconfigurations Found:
 - ID        : {{ .ID }}
   Title     : {{ .Title }}
   Severity  : {{ .Severity }}
-  Provider  : {{ .CauseMetadata.Provider }}
-  Service   : {{ .CauseMetadata.Service }}
-  File      : {{ .CauseMetadata.FilePath }}
-  Location  : Line {{ .CauseMetadata.StartLine }} - {{ .CauseMetadata.EndLine }}
   Message   : {{ .Message }}
   Resolution: {{ .Resolution }}
 {{- end }}
