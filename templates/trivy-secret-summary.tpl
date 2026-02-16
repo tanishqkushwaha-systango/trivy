@@ -8,11 +8,12 @@ Target: {{ .Target }}
 {{- if .Secrets }}
 Secrets Detected:
 {{- range .Secrets }}
-- Rule      : {{ .RuleID }}
+- Rule ID   : {{ .RuleID }}
   Category  : {{ .Category }}
   Severity  : {{ .Severity }}
   File      : {{ .FilePath }}
-  Line      : {{ .StartLine }}
+  Location  : Line {{ .StartLine }} - {{ .EndLine }}
+  Match Type: {{ .Match }}
 {{- end }}
 {{- else }}
 No secrets detected
