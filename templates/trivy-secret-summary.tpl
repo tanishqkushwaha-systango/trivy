@@ -8,16 +8,28 @@ Target: {{ .Target }}
 {{- if .Secrets }}
 Secrets Detected:
 {{- range .Secrets }}
-- Rule ID   : {{ .RuleID }}
-  Category  : {{ .Category }}
-  Severity  : {{ .Severity }}
-  File      : {{ .FilePath }}
-  Location  : Line {{ .StartLine }} - {{ .EndLine }}
-  Match Type: {{ .Match }}
+--------------------------------
+Rule ID   : {{ .RuleID }}
+Category  : {{ .Category }}
+Severity  : {{ .Severity }}
+Title     : {{ .Title }}
+
+File      : {{ (index .Code.Lines 0).Location.Path }}
+StartLine : {{ .StartLine }}
+EndLine   : {{ .EndLine }}
+
+Detected Value:
+{{ .Match }}
+
+Code Snippet:
+{{- range .Code.Lines }}
+  {{ .Number }} | {{ .Content }}
+{{- end }}
+
 {{- end }}
 {{- else }}
 No secrets detected
 {{- end }}
 
---------------------------------
+================================
 {{- end }}
