@@ -14,7 +14,7 @@ Category  : {{ .Category }}
 Severity  : {{ .Severity }}
 Title     : {{ .Title }}
 
-File      : {{ (index .Code.Lines 0).Location.Path }}
+File      : {{ (index .Code.Lines 0).Path }}
 StartLine : {{ .StartLine }}
 EndLine   : {{ .EndLine }}
 
