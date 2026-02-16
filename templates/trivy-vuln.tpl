@@ -15,7 +15,6 @@ Vulnerabilities Found:
   Fixed In  : {{ .FixedVersion }}
   Severity  : {{ .Severity }}
   Title     : {{ .Title }}
-  CVSS      : {{ (index .CVSS "nvd").V3Score }}
   Reference : {{ .PrimaryURL }}
 {{- end }}
 {{- else }}
