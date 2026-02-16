@@ -33,12 +33,11 @@ jobs:
             | sudo tee /etc/apt/sources.list.d/trivy.list
           sudo apt-get update -y
           sudo apt-get install -y trivy
-          trivy --version
 
       # ===============================
       # FILESYSTEM VULNERABILITY SCAN
       # ===============================
-      - name: Trivy Filesystem Scan (SARIF)
+      - name: Trivy Filesystem Scan
         run: |
           trivy fs . \
             --scanners vuln \
@@ -48,10 +47,16 @@ jobs:
             --output trivy-fs.sarif \
             --exit-code 0
 
+      - name: Upload Filesystem SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
       # ===============================
       # IAC CONFIG SCAN
       # ===============================
-      - name: Trivy IaC Scan (SARIF)
+      - name: Trivy IaC Scan
         run: |
           trivy config . \
             --severity HIGH,CRITICAL \
@@ -59,10 +64,16 @@ jobs:
             --output trivy-config.sarif \
             --exit-code 0
 
+      - name: Upload IaC SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-config.sarif
+          category: trivy-iac
+
       # ===============================
       # SECRET SCAN
       # ===============================
-      - name: Trivy Secret Scan (SARIF)
+      - name: Trivy Secret Scan
         run: |
           trivy fs . \
             --scanners secret \
@@ -70,10 +81,16 @@ jobs:
             --output trivy-secret.sarif \
             --exit-code 0
 
+      - name: Upload Secret SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-secret.sarif
+          category: trivy-secrets
+
       # ===============================
       # LICENSE SCAN
       # ===============================
-      - name: Trivy License Scan (SARIF)
+      - name: Trivy License Scan
         run: |
           trivy fs . \
             --scanners license \
@@ -81,15 +98,21 @@ jobs:
             --output trivy-license.sarif \
             --exit-code 0
 
+      - name: Upload License SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-license.sarif
+          category: trivy-licenses
+
       # ===============================
       # IMAGE BUILD + IMAGE SCAN
       # ===============================
-      - name: Build Docker Image (if Dockerfile exists)
+      - name: Build Docker Image
         if: hashFiles('Dockerfile') != ''
         run: |
           docker build -t trivy-test-image:scan .
 
-      - name: Trivy Image Scan (SARIF)
+      - name: Trivy Image Scan
         if: hashFiles('Dockerfile') != ''
         run: |
           trivy image trivy-test-image:scan \
@@ -98,11 +121,9 @@ jobs:
             --output trivy-image.sarif \
             --exit-code 0
 
-      # ----------------------------
-      # Upload SARIF to GitHub Security
-      # ----------------------------
-      - name: Upload Trivy SARIF Reports
+      - name: Upload Image SARIF
+        if: hashFiles('Dockerfile') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: .
-
+          sarif_file: trivy-image.sarif
+          category: trivy-image
