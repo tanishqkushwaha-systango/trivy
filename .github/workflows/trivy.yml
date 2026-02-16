@@ -83,9 +83,8 @@ jobs:
           trivy fs . \
             --scanners secret \
             --exit-code 0 \
-            --format template \
-            --template "@templates/trivy-secret-summary.tpl" \
-            --output trivy-secret-summary.txt
+            --format json \
+            --output trivy-secret-report.json
 
       # ===============================
       # LICENSE SCAN
