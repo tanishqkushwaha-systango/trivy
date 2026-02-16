@@ -1,12 +1,10 @@
 ==============================
-Trivy Image OS Vulnerabilities
+Trivy Image Vulnerability Summary
 ==============================
 
 {{- range . }}
-{{- if eq .Class "os-pkgs" }}
 Target: {{ .Target }}
-
-OS: {{ .Metadata.OS.Name }} {{ .Metadata.OS.Version }}
+Class : {{ .Class }}
 
 {{- if .Vulnerabilities }}
 Vulnerabilities:
@@ -17,11 +15,13 @@ Package   : {{ .PkgName }}
 Installed : {{ .InstalledVersion }}
 Fixed In  : {{ .FixedVersion }}
 Severity  : {{ .Severity }}
+{{- if .Layer }}
+Layer     : {{ .Layer.Digest }}
+{{- end }}
 {{- end }}
 {{- else }}
-No OS vulnerabilities detected
+No vulnerabilities detected
 {{- end }}
 
 ================================
-{{- end }}
 {{- end }}
