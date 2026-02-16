@@ -2,8 +2,11 @@ name: Trivy Security Scans
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - "**"
   pull_request:
+    branches:
+      - "**"
   workflow_dispatch:
 
 jobs:
