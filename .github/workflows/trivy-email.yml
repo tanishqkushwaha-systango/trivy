@@ -206,3 +206,13 @@ jobs:
           path: |
             trivy-*-summary.txt
             trivy-*-report.json
+
+            # ---------------------------------
+      # Fail workflow if Trivy findings detected
+      # ---------------------------------
+      - name: Fail workflow if Trivy issues found
+        if: steps.trivy_findings.outputs.findings_found == 'true'
+        run: |
+          echo "Trivy detected security issues. Failing the pipeline."
+          exit 1
+
