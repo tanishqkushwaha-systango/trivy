@@ -1,4 +1,4 @@
-name: Trivy Security Scans
+name: Trivy Security Scans with email
 
 on:
   push:
