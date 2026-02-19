@@ -1,22 +1,40 @@
 ==============================
-Trivy Secret Scan Summary
+Trivy Secret Scan Report
 ==============================
 
 {{- range . }}
-Target: {{ .Target }}
+{{- $file := .Target }}
+
+--------------------------------------------------
+Scanned File : {{ $file }}
+Scan Type   : Secret Detection
+--------------------------------------------------
 
 {{- if .Secrets }}
-Secrets Detected:
+  Secrets Detected ({{ len .Secrets }} finding{{ if gt (len .Secrets) 1 }}s{{ end }})
+
 {{- range .Secrets }}
-- Rule      : {{ .RuleID }}
-  Category  : {{ .Category }}
-  Severity  : {{ .Severity }}
-  File      : {{ .FilePath }}
-  Line      : {{ .StartLine }}
-{{- end }}
-{{- else }}
-No secrets detected
+--------------------------------
+Secret Type : {{ .Title }}
+Rule ID    : {{ .RuleID }}
+Category   : {{ .Category }}
+Severity   : {{ .Severity }}
+
+Location   : {{ $file }}
+Line Range : {{ .StartLine }} - {{ .EndLine }}
+
+Detected Value:
+{{ .Match }}
+
+Code Context:
+{{- range .Code.Lines }}
+  {{ .Number }} | {{ .Content }}
 {{- end }}
 
---------------------------------
+{{- end }}
+{{- else }}
+ No secrets detected in this file
+{{- end }}
+
+==================================================
 {{- end }}

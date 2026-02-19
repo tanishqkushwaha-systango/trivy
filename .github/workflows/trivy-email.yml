@@ -1,4 +1,4 @@
-name: Trivy Security Scans
+name: Trivy Security Scans with email
 
 on:
   push:
@@ -133,6 +133,68 @@ jobs:
             --template "@templates/trivy-img.tpl" \
             --output trivy-image-os-summary.txt
 
+      # ---------------------------------
+      # Detect Trivy Findings (ALL Scans)
+      # ---------------------------------
+      - name: Check for Trivy Findings
+        id: trivy_findings
+        run: |
+          findings=false
+
+          for file in trivy-*-summary.txt; do
+            if [ -f "$file" ] && grep -qiE "CRITICAL|HIGH|Secret|Violation|License" "$file"; then
+              echo "Findings detected in $file"
+              findings=true
+            fi
+          done
+
+          echo "findings_found=$findings" >> $GITHUB_OUTPUT
+
+      # ---------------------------------
+      # Send external email alert on Trivy findings
+      # ---------------------------------
+      - name: Send Email Alert (Trivy Scan)
+        if: steps.trivy_findings.outputs.findings_found == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Trivy Alert: Security issues detected in ${{ github.repository }}"
+          to: ${{ secrets.ALERT_EMAILS }}
+          from: "Trivy CI <${{ secrets.SMTP_USERNAME }}>"
+          attachments: |
+            trivy-fs-vuln-summary.txt
+            trivy-fs-config-summary.txt
+            trivy-secret-summary.txt
+            trivy-license-summary.txt
+            trivy-image-os-summary.txt
+          body: |
+            SECURITY ALERT - TRIVY SCAN
+
+            One or more Trivy security scans detected issues.
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Actor: ${{ github.actor }}
+
+            Scan coverage:
+            - Filesystem vulnerabilities (OS & dependencies)
+            - Infrastructure as Code (IaC)
+            - Secrets detection
+            - License compliance
+            - Container image vulnerabilities
+
+            Immediate actions required:
+            - Review the attached Trivy reports
+            - Fix or suppress false positives
+            - Rotate any exposed credentials
+            - Re-run the pipeline after remediation
+
+            This alert was sent automatically by GitHub Actions.
+
 
       # ----------------------------
       # Upload Reports
@@ -144,3 +206,13 @@ jobs:
           path: |
             trivy-*-summary.txt
             trivy-*-report.json
+
+            # ---------------------------------
+      # Fail workflow if Trivy findings detected
+      # ---------------------------------
+      - name: Fail workflow if Trivy issues found
+        if: steps.trivy_findings.outputs.findings_found == 'true'
+        run: |
+          echo "Trivy detected security issues. Failing the pipeline."
+          exit 1
+

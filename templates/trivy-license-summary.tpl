@@ -11,6 +11,7 @@ Licenses Found:
 - Package  : {{ .PkgName }}
   Version  : {{ .PkgVersion }}
   License  : {{ .Name }}
+  File     : {{ .FilePath }}
 {{- end }}
 {{- else }}
 No license issues detected
