@@ -1,2 +1,1 @@
-API_KEY = "AIzaSyDUMMY1234567890ABCDEFG"
-print("Hello")
+
