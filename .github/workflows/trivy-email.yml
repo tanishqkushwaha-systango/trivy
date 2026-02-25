@@ -2,11 +2,9 @@ name: Trivy Security Scans with email
 
 on:
   push:
-    branches:
-      - "**"
+    branches: ["**"]
   pull_request:
-    branches:
-      - "**"
+    branches: ["**"]
   workflow_dispatch:
 
 jobs:
